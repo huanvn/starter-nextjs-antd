@@ -1,0 +1,12 @@
+**/.DS_Store
+.git/
+.gitlab-ci.yml
+.gitignore
+.dockerignore
+.volumes
+
+.next
+
+Dockerfile*
+docker-compose.yml
+README.md

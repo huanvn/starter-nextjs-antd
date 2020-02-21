@@ -1,0 +1,54 @@
+version: "3.7"
+
+x-service: &default-service
+  restart: always
+  logging:
+    #driver: "json-file"
+    options:
+      max-size: "150m"
+      max-file: "6"
+
+services:
+  #-------------------------------------------------------------------
+  postgres:
+    <<: *default-service
+    container_name: starterkit-postgres
+    image: postgres:12-alpine
+    expose:
+      - "5432"
+    ports:
+      - "24123:5432"
+    volumes:
+      - .volumes/postgresql/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=2tqevZmK
+      - POSTGRES_DB=css
+      - POSTGRES_ENCODING=UTF8
+      - POSTGRES_COLLATE=C
+      - POSTGRES_COLLATE_TYPE=C
+  #-------------------------------------------------------------------
+  graphql:
+    <<: *default-service
+    container_name: starterkit-graphql
+    image: hasura/graphql-engine:v1.1.0
+    ports:
+      - "3001:8080"
+    depends_on:
+      - "postgres"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:2tqevZmK@postgres:5432/css
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: 2tqevZmK
+  #-------------------------------------------------------------------
+  pgweb:
+    <<: *default-service
+    container_name: starterkit-pgweb
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    ports:
+      - 3002:80
+    environment:
+      DATABASE_URL: postgres://postgres:2tqevZmK@postgres:5432/css
